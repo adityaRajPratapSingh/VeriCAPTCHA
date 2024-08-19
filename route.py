@@ -1,10 +1,11 @@
 from fastapi import APIRouter, HTTPException, Form, Depends
-from models import User, Token
-from auth_functions import get_password_hash, authenticate_user, create_access_token
-from database import client, db_1,collection_1
+from models import User, Token, UserInDB
+from auth_functions import get_password_hash, authenticate_user, create_access_token, get_current_active_user
+from database import client, db_1,collection_1, return_a_random_document, db_2, collection_2
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import datetime, timedelta
 import creds
+from schema import serialise_2
 
 router = APIRouter()
 
@@ -23,14 +24,14 @@ async def create_new_user(user: User):
     try:
         coll.insert_one(user_dict)
     except Exception as e:
-        raise HTTPException(status_code=500, detail="COULD NOT INSERT THE NEW USER")
+        raise HTTPException(status_code=500, detail=f"COULD NOT INSERT THE NEW USER = {e}")
     
 @router.post('/user/signin')
 async def check_the_signin(username:str, password:str):
     try:
         user= authenticate_user(db_1,collection_1, username, password)
     except Exception as e:
-        raise HTTPException(status_code=401, detail="COULD NOT AUTHERNTICATE THE USER")
+        raise HTTPException(status_code=401, detail=f"COULD NOT AUTHERNTICATE THE USER = {e}")
     return user
 
 @router.post('/token', response_model=Token)
@@ -45,3 +46,11 @@ async def login_for_access_token(form_data:OAuth2PasswordRequestForm=Depends()):
     )
     return {'access_token':access_token, 'token_type':'bearer'}
 
+@router.post('/request_captcha')
+async def request_captcha(current_user:UserInDB = Depends(get_current_active_user)):
+    try:
+        random_document=return_a_random_document(db_2, collection_2)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"COULD NOT FETCHA A DOCUMENT LIST FROM THE COLLECTION = {e}")
+    doc= serialise_2(random_document)
+    return doc

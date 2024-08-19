@@ -1,4 +1,4 @@
-from database import client
+from database import client, db_1,collection_1
 from fastapi import HTTPException, Depends, status
 from models import UserInDB, TokenData
 from datetime import datetime, timedelta
@@ -66,7 +66,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 #it retrives and verifies the current users identity based on the jtw token that it provides the web server
 #and then decode it and retrieve the sub (subject) from the request.
-async def get_current_user(db:str, collection:str, token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: str = Depends(oauth2_scheme)):
     credential_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Could not validate credentials", headers={"WWW-Authenticate": "Bearer"})
     try:
         payload = jwt.decode(token, creds.Creds.SECRET_KEY, algorithms=[creds.Creds.ALGORITHM])
@@ -78,7 +78,7 @@ async def get_current_user(db:str, collection:str, token: str = Depends(oauth2_s
     except JWTError:
         raise credential_exception
 
-    user = get_user(db, collection, username=token_data.username)
+    user = get_user(db_1, collection_1, username=token_data.username)
     if user is None:
         raise credential_exception
 
