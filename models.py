@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 class Token(BaseModel):
     access_token:str
@@ -24,3 +24,9 @@ class User_wop(BaseModel):  #wop = without password
 
 class UserInDB(User_wop):
     hashed_password:str
+
+class RequestedData(BaseModel):
+    name: str
+    email: EmailStr
+    requested_detail: str
+    phone_no: int

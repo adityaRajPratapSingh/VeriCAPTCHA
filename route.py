@@ -1,13 +1,14 @@
 from fastapi import APIRouter, HTTPException, Form, Depends
 from models import User, Token, UserInDB
 from auth_functions import get_password_hash, authenticate_user, create_access_token, get_current_active_user
-from database import client, db_1,collection_1, return_a_random_document, db_2, collection_2, return_the_labels, collection_3
+from database import client, db_1,collection_1, return_a_random_document, db_2, collection_2, return_the_labels, collection_3, add_requested_data, send_email
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import datetime, timedelta
 import creds
 from schema import serialise_2
 import base64
 from text_to_img import get_random_image
+from pydantic import EmailStr
 
 router = APIRouter()
 
@@ -48,7 +49,7 @@ async def login_for_access_token(form_data:OAuth2PasswordRequestForm=Depends()):
     )
     return {'access_token':access_token, 'token_type':'bearer'}
 
-@router.post('/request_captcha')
+@router.post('/captcha/request_captcha')
 async def request_captcha(current_user:UserInDB = Depends(get_current_active_user)):
     try:
         random_document=return_a_random_document(db_2, collection_2)
@@ -63,7 +64,7 @@ async def request_captcha(current_user:UserInDB = Depends(get_current_active_use
     doc['image']=image_base64
     return doc
 
-@router.get('/request_labels')
+@router.get('/captcha/request_labels')
 async def request_labels(current_user:UserInDB = Depends(get_current_active_user)):
     try:
         labels=return_the_labels(db_2, collection_3)
@@ -71,3 +72,22 @@ async def request_labels(current_user:UserInDB = Depends(get_current_active_user
         raise HTTPException(status_code=404, detail=f"COULD NOT FETCH THE LABELS = {e}")
     
     return labels
+
+@router.post("/submit_request")
+async def submit_request(
+        name: str = Form(...),
+        address: str = Form(...),
+        email: EmailStr = Form(...),
+        phone: str = Form(...),
+        request_detail: str = Form(...),
+):
+    data = {
+        "name": name,
+        "address": address,
+        "email": email,
+        "phone": phone,
+        "description": request_detail,
+    }
+    add_requested_data(data)
+    send_email(data)
+    return {"message": "order successfully received"}
