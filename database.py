@@ -4,7 +4,7 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from pymongo import errors
 import random
-from schema import serialise_2
+from schema import serialise_2, serealise_3
 from fastapi import HTTPException
 
 uri = f"mongodb+srv://{quote_plus(creds.Creds.USER)}:{quote_plus(creds.Creds.PASS)}@cluster0.4cy2ale.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
@@ -14,6 +14,7 @@ db_1 = 'users'
 db_2 = 'sentence_captcha'
 collection_1='user_data'
 collection_2 = 'sentence_w_label'
+collection_3='label_classes'
 
 def return_a_random_document(db:str, collection:str):
     database=client[db]
@@ -30,3 +31,16 @@ def return_a_random_document(db:str, collection:str):
         return return_a_random_document(db, collection)
     return random_document
 
+def return_the_labels(db:str, collection:str):
+    database=client[db]
+    coll=database[collection]
+    count= coll.count_documents({})
+    if count == 0:
+        raise HTTPException(status_code=404, detail="THERE ARE NO DOCUMENTS IN THE COLLECTION")
+    labels={}
+    cursor=coll.find()
+    cursor_list=list(cursor)
+    for c in cursor_list:
+        serealized = serealise_3(c)
+        labels[serealized['label']]=serealized['label_class']
+    return labels

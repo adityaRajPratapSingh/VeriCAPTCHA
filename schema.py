@@ -15,3 +15,10 @@ def serialise_2(obj)->dict:
         "sentence":obj['sentence'],
         "label": obj['label']
     }
+
+def serealise_3(obj)->dict:
+    return{
+        "id":str(obj['_id']),
+        "label_class":obj['label_class'],
+        'label':obj['label']
+    }
