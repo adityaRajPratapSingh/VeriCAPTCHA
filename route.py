@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException, Form
-from models import User
+from fastapi import APIRouter, HTTPException, Form, Depends
+from models import User, Token
 from auth_functions import get_password_hash, authenticate_user
 from database import client, db_1,collection_1
+from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter()
 
@@ -30,5 +31,9 @@ async def check_the_signin(username:str, password:str):
         raise HTTPException(status_code=401, detail="COULD NOT AUTHERNTICATE THE USER")
     return user
 
-# @router.post('/token')
-# async def login_for_access_token()
+@router.post('/token', response_model=Token)
+async def login_for_access_token(form_data:OAuth2PasswordRequestForm=Depends()):
+    user = authenticate_user(db_1, collection_1, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(status_code=401, detail='INCORRECT USERNAME OR PASSWORD', headers={'WWW-Authenticate':"Bearer"})
+    
