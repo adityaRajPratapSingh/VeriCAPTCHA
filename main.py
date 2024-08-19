@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes.route import router
+from route import router
 from mangum import Mangum
 from fastapi.middleware.cors import CORSMiddleware
 
