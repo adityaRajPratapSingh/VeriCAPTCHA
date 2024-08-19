@@ -54,3 +54,4 @@ async def request_captcha(current_user:UserInDB = Depends(get_current_active_use
         raise HTTPException(status_code=404, detail=f"COULD NOT FETCHA A DOCUMENT LIST FROM THE COLLECTION = {e}")
     doc= serialise_2(random_document)
     return doc
+
