@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Form, Depends
-from models import User, Token, UserInDB
+from models import User, Token, UserInDB, RequestedData, CaptchaResponse
 from auth_functions import get_password_hash, authenticate_user, create_access_token, get_current_active_user
-from database import client, db_1,collection_1, return_a_random_document, db_2, collection_2, return_the_labels, collection_3, add_requested_data, send_email
+from database import client, db_1,collection_1, return_a_random_document, db_2, collection_2, return_the_labels, collection_3, add_requested_data, send_email, find_update_and_upsert, collection_5
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import datetime, timedelta
 import creds
@@ -91,3 +91,15 @@ async def submit_request(
     add_requested_data(data)
     send_email(data)
     return {"message": "order successfully received"}
+
+@router.post('/captcha/captcha_response')
+async def captcha_response(response:CaptchaResponse, current_user:UserInDB = Depends(get_current_active_user)):
+    try:
+        labels=return_the_labels(db_2, collection_3)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"COULD NOT FETCH THE LABELS = {e}")
+    if response.suspected_label not in labels.values():
+        return False
+    else:
+        find_update_and_upsert(db_2, collection_5, response.id, response.suspected_label)
+        return True

@@ -30,3 +30,7 @@ class RequestedData(BaseModel):
     email: EmailStr
     requested_detail: str
     phone_no: int
+
+class CaptchaResponse(BaseModel):
+    id:str
+    suspected_label:str

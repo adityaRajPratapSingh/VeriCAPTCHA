@@ -8,6 +8,8 @@ from schema import serialise_2, serealise_3
 from fastapi import HTTPException
 from models import RequestedData
 import smtplib
+from bson import ObjectId
+from datetime import datetime
 
 uri = f"mongodb+srv://{quote_plus(creds.Creds.USER)}:{quote_plus(creds.Creds.PASS)}@cluster0.4cy2ale.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 client = MongoClient(uri, server_api=ServerApi('1'))
@@ -18,7 +20,9 @@ db_2 = 'sentence_captcha'
 collection_1='user_data'
 collection_2 = 'sentence_w_label'
 collection_3='label_classes'
-collection4='user_request_data'
+collection_4='user_request_data'
+collection_5='vericaptcha_output'
+
 
 def return_a_random_document(db:str, collection:str):
     database=client[db]
@@ -74,7 +78,27 @@ def send_email(data: RequestedData):
 def add_requested_data(data: RequestedData):
     try:
         database=client[db_2]
-        coll = database[collection4]
-        id = coll.insert_one(data)
+        coll = database[collection_4]
+        coll.insert_one(data)
     except errors.PyMongoError as e:
         raise Exception(f'{e}')
+
+
+def find_update_and_upsert(db:str, collection:str, id:str, suspected_label:str):
+    try:
+        database=client[db]
+        coll=database[collection]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'there is no collection by the name {collection} = {e}')
+    
+    current_time = datetime.now().strftime('%Y%m%d%H%M%S')
+    dynamic_key = f'suspected_label_{current_time}'
+
+    try:
+        coll.find_one_and_update(
+            {'_id':ObjectId(id)},
+            {'$set':{'_id':ObjectId(id), dynamic_key:suspected_label}},
+            upsert=True
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=e)
