@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Form, Depends
 from models import User, Token, UserInDB, RequestedData, CaptchaResponse
 from auth_functions import get_password_hash, authenticate_user, create_access_token, get_current_active_user
-from database import client, db_1,collection_1, return_a_random_document, db_2, collection_2, return_the_labels, collection_3, add_requested_data, send_email, find_update_and_upsert, collection_5
+from database import client, db_1,collection_1, return_a_random_document, db_2, collection_2, return_the_labels, collection_3, add_requested_data, send_email, find_update_and_upsert, collection_5, update_the_score
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import datetime, timedelta
 import creds
@@ -102,4 +102,5 @@ async def captcha_response(response:CaptchaResponse, current_user:UserInDB = Dep
         return False
     else:
         find_update_and_upsert(db_2, collection_5, response.id, response.suspected_label)
+        update_the_score(current_user.username, current_user.score)
         return True

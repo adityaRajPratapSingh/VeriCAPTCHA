@@ -102,3 +102,14 @@ def find_update_and_upsert(db:str, collection:str, id:str, suspected_label:str):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=e)
+
+def update_the_score(username:str, current_score:int):
+    database=client[db_1]
+    coll=database[collection_1]
+    try:
+        coll.find_one_and_update(
+            {'username':username},
+            {'$set':{'score':current_score+1}}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=e)
