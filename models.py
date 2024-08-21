@@ -34,3 +34,7 @@ class RequestedData(BaseModel):
 class CaptchaResponse(BaseModel):
     id:str
     suspected_label:str
+
+class signin(BaseModel):
+    username:str
+    password:str

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Form, Depends
-from models import User, Token, UserInDB, RequestedData, CaptchaResponse
+from models import User, Token, UserInDB, RequestedData, CaptchaResponse, signin
 from auth_functions import get_password_hash, authenticate_user, create_access_token, get_current_active_user
 from database import client, db_1,collection_1, return_a_random_document, db_2, collection_2, return_the_labels, collection_3, add_requested_data, send_email, find_update_and_upsert, collection_5, update_the_score
 from fastapi.security import OAuth2PasswordRequestForm
@@ -30,9 +30,9 @@ async def create_new_user(user: User):
         raise HTTPException(status_code=500, detail=f"COULD NOT INSERT THE NEW USER = {e}")
     
 @router.post('/user/signin')
-async def check_the_signin(username:str, password:str):
+async def check_the_signin(signin_user:signin):
     try:
-        user= authenticate_user(db_1,collection_1, username, password)
+        user= authenticate_user(db_1,collection_1, signin_user.username, signin_user.password)
     except Exception as e:
         raise HTTPException(status_code=401, detail=f"COULD NOT AUTHERNTICATE THE USER = {e}")
     return user
