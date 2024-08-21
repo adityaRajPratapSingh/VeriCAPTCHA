@@ -5,8 +5,8 @@ from PIL import Image
 
 def the_image_labels(text:str):
     captcha:ImageCaptcha = ImageCaptcha(
-      width=200,
-      height = 100,
+      width=150,
+      height = 50,
       fonts = [
           #'./Jersey10-Regular.ttf',
           #'./Lato-Black.ttf',
