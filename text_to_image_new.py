@@ -5,7 +5,7 @@ from PIL import Image
 
 def the_image(text:str):
     captcha:ImageCaptcha = ImageCaptcha(
-      width=400,
+      width=700,
       height = 400,
       fonts = [
           './Jersey10-Regular.ttf',
@@ -16,4 +16,5 @@ def the_image(text:str):
       font_sizes=(70, 40, 100, 30)
     )
     data:BytesIO = captcha.generate(text)
+    
     return data.read()
