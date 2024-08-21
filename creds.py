@@ -1,6 +1,0 @@
-class Creds:
-    USER='magellan2409'
-    PASS='nbLXCg85zqToP3t7'
-    SECRET_KEY='744ea058bfeb4eee9955785832de9982daeffe4ad8b4262e231ffc6edd5ff87f'
-    ALGORITHM='HS256'
-    ACCESS_TOKEN_EXPIRE_MINUTES=30
