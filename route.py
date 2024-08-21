@@ -9,6 +9,7 @@ from schema import serialise_2
 import base64
 from text_to_img import get_random_image
 from pydantic import EmailStr
+from text_to_image_new import the_image
 
 router = APIRouter()
 
@@ -56,10 +57,7 @@ async def request_captcha(current_user:UserInDB = Depends(get_current_active_use
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"COULD NOT FETCHA A DOCUMENT LIST FROM THE COLLECTION = {e}")
     doc= serialise_2(random_document)
-    image_bytes = get_random_image(
-                "./BPtypewriteStrikethrough.ttf",
-                doc['sentence']
-            )
+    image_bytes = the_image( doc['sentence'])
     image_base64 = base64.b64encode(image_bytes).decode('utf-8')
     doc['image']=image_base64
     return doc
