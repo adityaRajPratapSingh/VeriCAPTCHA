@@ -10,6 +10,7 @@ import base64
 from text_to_img import get_random_image
 from pydantic import EmailStr
 from text_to_image_new import the_image
+from text_to_image_new_labels import the_image_labels
 
 router = APIRouter()
 
@@ -64,12 +65,16 @@ async def request_captcha(current_user:UserInDB = Depends(get_current_active_use
 
 @router.get('/captcha/request_labels')
 async def request_labels(current_user:UserInDB = Depends(get_current_active_user)):
+    d={}
     try:
         labels=return_the_labels(db_2, collection_3)
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"COULD NOT FETCH THE LABELS = {e}")
-    
-    return labels
+    for i in  labels.values():
+        image_bytes=the_image_labels(i)
+        image_base64=base64.b64encode(image_bytes).decode('utf-8')
+        d[i]=image_base64
+    return d
 
 @router.post("/submit_request")
 async def submit_request(
